@@ -1,0 +1,24 @@
+APR 14,2016
+
+After experimenting with Robert's code found here
+https://github.com/linhartr22/Arduino_SPI_Master_Slave_Demo/blob/master/SPI_Slave_Demo/SPI_Slave_Demo.ino
+I tried setting up SPI on 9s12 and managed to send out stuff just fine! But there's a problem though. It seems like data sent
+was messed up. In serial monitor it shows that I sent out several different chars (shown in ascii), while I only have putcspi('a')
+I have absolutely no idea what happened, I don't know if it's from 9S12 or ATmega. It drove me crazy for quite a long time. Then it hits me
+
+The problem here is the baud rate! code from 9S12 wasn't configured with the appropriate Baud Rate, causing data to be messed up on 
+transmission line.
+
+I don't know exactly what the value should be so I set up SPIBR to be 0x77 to max out divider and it works! now it only shows that I sent
+out a byte with value 97 which is an 'a'. Now I will just have to  find the correct value for my baud rate
+
+Here's a quick summary of how to do it properly.
+
+1 ) set up SPI (Code sample in textbook, lab08)
+2 ) Before transmission begins, make sure to toggle slave select line of the one that you want to talk with 
+(SS to high = deselect, it's active low you dummy)
+3 ) perform regular transmission
+4 ) Toggle back SS line to high to deselect
+5 ) Done, easy right?
+
+Now that I can talk to one Arduino, let see if we can do two Slaves..... I will keep you up to date
