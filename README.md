@@ -20,6 +20,10 @@ ECE362 Mini Project
   
 
 # Dev Log
+Update 2016-Apr-16 <br />
+  - TIM ISR is now finished. 9S12 will now send a character over to Slave ATmega every 1 sec
+  - Future changes needed: might want to change data transferring rate to 10 ms, not 1 sec
+ 
 Update 2016-Apr-14 <br />
   - Successfully set up SPI communication between 9S12 Master with Arduino Uno slave <br />
   - Successfully sent out one char to slave without fail <br />
