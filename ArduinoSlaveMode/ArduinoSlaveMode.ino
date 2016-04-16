@@ -17,8 +17,11 @@ const int LedG = 8;
 const int LedDP = 9;
 
 /*DISPLAY COUNTER*/
-int DisplayCounter=0;
 
+int ten_min = 0;
+int ten_sec = 0;
+int one_min = 0;
+int one_sec = 0;
 
 //Initialize SPI slave.
 void SlaveInit(void) {
@@ -63,7 +66,7 @@ void loop() {
       Serial.println("Initial -1 slave response code sent");
       Serial.println("rx:" + String(rx) + ".");
       IncrementCounter();
-      DisplayNumber(DisplayCounter);
+      //DisplayNumber(DisplayCounter);
       SSlast = LOW;
     }
   }
@@ -92,10 +95,19 @@ void ledsInit(void){
   pinMode(LedF,OUTPUT);
   pinMode(LedG,OUTPUT);
   pinMode(LedDP,OUTPUT);
+  pinMode(A0,OUTPUT);
+  pinMode(A2,OUTPUT);
+  pinMode(A3,OUTPUT);
+  pinMode(A4,OUTPUT);
+  pinMode(A5,OUTPUT);
+  //digitalWrite(A0,HIGH);
+  
   /*DEBUG*/
-  DisplayNumber(DisplayCounter);
+ // DisplayNumber(DisplayCounter);
 }
 
+
+/*Truth table*/
 void DisplayNumber(int num){
   switch(num){
     case 0: digitalWrite(LedA,HIGH);
@@ -181,10 +193,68 @@ void DisplayNumber(int num){
                
   }  
 }
-void IncrementCounter(void){
-  DisplayCounter++;
-  if(DisplayCounter > 9){
-    DisplayCounter = 0; 
-  }
-  return;  
+void IncrementCounter(void)
+{
+  one_sec++;
+
+  // Changing the Digit 
+  digitalWrite(A2,LOW);
+  digitalWrite(A3,HIGH);
+  digitalWrite(A4,HIGH);
+  digitalWrite(A5,HIGH);
+  
+  DisplayNumber(one_sec);
+  
+  if(one_sec == 10)
+  {
+    one_sec = 0;
+    ten_sec++;
+    //pattern = 0x02; // 0010
+
+    // Changing the Digit 
+    digitalWrite(A2,HIGH);
+    digitalWrite(A3,LOW);
+    digitalWrite(A4,HIGH);
+    digitalWrite(A5,HIGH);
+    
+    DisplayNumber(ten_sec);
+  
+        
+    if(ten_sec == 6)
+    {
+      ten_sec = 0;
+      one_min++;  
+      //pattern = 0x04;
+
+      digitalWrite(A2,HIGH);
+      digitalWrite(A3,HIGH);
+      digitalWrite(A4,LOW);
+      digitalWrite(A5,HIGH);
+      
+      DisplayNumber(one_min);
+      if(one_min == 10)
+      {
+        ten_min += 1;
+        one_min = 0;
+        //pattern = 0x08;
+         
+        digitalWrite(A2,HIGH);
+        digitalWrite(A3,HIGH);
+        digitalWrite(A4,HIGH);
+        digitalWrite(A5,LOW);
+      
+       DisplayNumber(ten_min);
+       if(ten_min == 6)
+        {
+          one_sec = 0;
+          one_min = 0;
+          ten_sec = 0;
+          ten_min = 0;
+       }  
+      }
+     }
+    }
 }
+  
+  
+ 
