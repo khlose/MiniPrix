@@ -12,10 +12,12 @@ ECE362 Mini Project
     - Pin 29 = Regulated 5 V <br />
       
   Arduino Side <br />
-    - Pin 13 = SCK <br />
-    - Pin 12 = MISO <br />
-    - Pin 11 = MOSI <br />
-    - Pin 10 = Slave Select <br />
+    - Digital Pin 13 = SCK <br />
+    - Digital Pin 12 = MISO <br />
+    - Digital Pin 11 = MOSI <br />
+    - Digital Pin 10 = Slave Select1 <br />
+    - Analog in A0 = Slave Select2 <br />
+    - Analog in A1 = Slave Select3 <br />
     All ground connected  to Master's Ground <br />
   4 digits 7 segment LEDs <br />
     - A 13 => ATmega 2 <br />
