@@ -142,14 +142,14 @@ void  initializations(void) {
 /* Initialize interrupts */
 
   /*TIM*/
-  /*
+  
   DDRT = 0xFF;
   TSCR1 = 0x80;
   TSCR2 = 0x0C;
   TIOS = 0x80;
   TIE = 0x80;
   TC7 = 1500;
-  */
+  
   
   /*SPI*/
   
@@ -197,8 +197,11 @@ void main(void) {
  for(;;) {
   
   
+  if(onesec == 1){
+    putcspi('b');
+    onesec = 0;
   
-  putcspi('a');
+  }
   
   
    } /* loop forever */
@@ -238,7 +241,7 @@ interrupt 15 void TIM_ISR(void)
     tenths = 1;
     tencnt = 0; 	
  	}
- 	if(onecnt >= 100){ //100 of 10 ms = 1 sec
+ 	if(onecnt >= 1000){ //100 of 10 ms = 1 sec
  	  onecnt = 0;
  	  onesec = 1;
  	  
