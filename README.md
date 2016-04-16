@@ -11,7 +11,7 @@ ECE362 Mini Project
     - Pin 4, 31 = GND <br />
     - Pin 29 = Regulated 5 V <br />
       
-  Arduino Side
+  Arduino Side <br />
     - Pin 13 = SCK <br />
     - Pin 12 = MISO <br />
     - Pin 11 = MOSI <br />
