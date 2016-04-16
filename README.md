@@ -17,7 +17,7 @@ ECE362 Mini Project
     - Pin 11 = MOSI <br />
     - Pin 10 = Slave Select <br />
     All ground connected  to Master's Ground <br />
-  4 digits 7 segment LEDs
+  4 digits 7 segment LEDs <br />
     - A 13 => ATmega 0 <br />
     - B 9 => ATmega 1 <br />
     - C 4 => ATmega 2 <br />
