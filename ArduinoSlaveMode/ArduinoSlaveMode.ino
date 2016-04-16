@@ -1,40 +1,25 @@
-/* SPI Slave Demo
- *
- * Slave toggles slave LED upon receipt of cmdBtn master command code.
- *
- * Communication Protocol:
- * Slave acknowledges SS (Slave Select) by sending -1 slave response code and receiving 
- * master command code. On subsequent SS slave sends master command code or -1 slave 
- * response code indicating an unrecognized command has been received. Additional SS's 
- * may be needed to transfer additional data to/from Slave depending on the master command
- * code.
- *
- * Master command codes:
- * cmdBtn.
- * Inform slave of a master button press.
- *
- * SPI pin numbers:
- * SCK   13  // Serial Clock.
- * MISO  12  // Master In Slave Out.
- * MOSI  11  // Master Out Slave In.
- * SS    10  // Slave Select
- *
- * If you found this fun or interesting please make a small donation to my PayPal account 
- * at https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=GTBD7T7BXPGQY. 
- * I have many more Arduino projects in mind and appreciate your support.
- *
- * No commercial use without prior consent.
- *
- * Based on code by: Nick Cammon 2/2011.
- */
-// Include SPI (Serial Peripheral Interface) library. Does not support SPI Slave.
 #include <SPI.h>
+
+/*SPI RELATED VARIBALES*/
 boolean SSlast = LOW;         // SS last flag.
 const byte led = 9;           // Slave LED digital I/O pin.
 boolean ledState = HIGH;      // LED state flag.
-const byte cmdBtn = 1;        // SPI cmdBtn master command code.
-const byte cmdLEDState = 2;   // 
 byte rx = 0;
+
+/*LEDs PORT*/
+const int LedA = 2;
+const int LedB = 3;
+const int LedC = 4;
+const int LedD = 5;
+const int LedE = 6;
+const int LedF = 7;
+const int LedG = 8;
+const int LedDP = 9;
+
+/*DISPLAY COUNTER*/
+int DisplayCounter=0;
+
+
 //Initialize SPI slave.
 void SlaveInit(void) {
   // Initialize SPI pins.
@@ -61,6 +46,7 @@ void setup() {
   digitalWrite(led, ledState);
   // Initialize SPI Slave.
   SlaveInit();
+  ledsInit();
   Serial.println("Slave Initialized");
 }
 // The loop function runs continuously after setup().
@@ -76,7 +62,8 @@ void loop() {
       rx = SPItransfer(255);
       Serial.println("Initial -1 slave response code sent");
       Serial.println("rx:" + String(rx) + ".");
-     
+      IncrementCounter();
+      DisplayNumber(DisplayCounter);
       SSlast = LOW;
     }
   }
@@ -92,3 +79,112 @@ void loop() {
   }
 }
 
+
+
+
+/*LED test*/
+void ledsInit(void){
+  pinMode(LedA,OUTPUT);
+  pinMode(LedB,OUTPUT);
+  pinMode(LedC,OUTPUT);
+  pinMode(LedD,OUTPUT);
+  pinMode(LedE,OUTPUT);
+  pinMode(LedF,OUTPUT);
+  pinMode(LedG,OUTPUT);
+  pinMode(LedDP,OUTPUT);
+  /*DEBUG*/
+  DisplayNumber(DisplayCounter);
+}
+
+void DisplayNumber(int num){
+  switch(num){
+    case 0: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,HIGH);
+            digitalWrite(LedE,HIGH); 
+            digitalWrite(LedF,HIGH); 
+            digitalWrite(LedG,LOW); 
+            break;
+    case 1: digitalWrite(LedA,LOW);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,LOW);
+            digitalWrite(LedE,LOW); 
+            digitalWrite(LedF,LOW); 
+            digitalWrite(LedG,LOW); 
+            break;
+     case 2: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,LOW);
+            digitalWrite(LedD,HIGH);
+            digitalWrite(LedE,HIGH); 
+            digitalWrite(LedF,LOW); 
+            digitalWrite(LedG,HIGH); 
+            break;
+     case 3: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,HIGH);
+            digitalWrite(LedE,LOW); 
+            digitalWrite(LedF,LOW); 
+            digitalWrite(LedG,HIGH); 
+            break;
+     case 4: digitalWrite(LedA,LOW);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,LOW);
+            digitalWrite(LedE,LOW); 
+            digitalWrite(LedF,HIGH); 
+            digitalWrite(LedG,HIGH); 
+            break;
+      case 5: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,LOW);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,HIGH);
+            digitalWrite(LedE,LOW); 
+            digitalWrite(LedF,HIGH); 
+            digitalWrite(LedG,HIGH); 
+            break;
+      case 6: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,LOW);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,HIGH);
+            digitalWrite(LedE,HIGH); 
+            digitalWrite(LedF,HIGH); 
+            digitalWrite(LedG,HIGH); 
+            break;
+     case 7: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,LOW);
+            digitalWrite(LedE,LOW); 
+            digitalWrite(LedF,LOW); 
+            digitalWrite(LedG,LOW); 
+            break;
+      case 8: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,HIGH);
+            digitalWrite(LedE,HIGH); 
+            digitalWrite(LedF,HIGH); 
+            digitalWrite(LedG,HIGH); 
+            break;
+     case 9: digitalWrite(LedA,HIGH);
+            digitalWrite(LedB,HIGH);
+            digitalWrite(LedC,HIGH);
+            digitalWrite(LedD,HIGH);
+            digitalWrite(LedE,LOW); 
+            digitalWrite(LedF,HIGH); 
+            digitalWrite(LedG,HIGH); 
+            break;
+               
+  }  
+}
+void IncrementCounter(void){
+  DisplayCounter++;
+  if(DisplayCounter > 9){
+    DisplayCounter = 0; 
+  }
+  return;  
+}
