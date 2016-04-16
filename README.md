@@ -18,14 +18,14 @@ ECE362 Mini Project
     - Pin 10 = Slave Select <br />
     All ground connected  to Master's Ground <br />
   4 digits 7 segment LEDs <br />
-    - A 13 => ATmega 0 <br />
-    - B 9 => ATmega 1 <br />
-    - C 4 => ATmega 2 <br />
-    - D 2 => ATmega 3 <br />
-    - E 1 => ATmega 4 <br />
-    - F 12 => ATmega 5 <br />
-    - G 5 => ATmega 6 <br />
-    - dp 3 => ATmega 7 <br />
+    - A 13 => ATmega 2 <br />
+    - B 9 => ATmega 3 <br />
+    - C 4 => ATmega 7 <br />
+    - D 2 => ATmega 8 <br />
+    - E 1 => ATmega 9 <br />
+    - F 12 => ATmega 7 <br />
+    - G 5 => ATmega 8 <br />
+    - dp 3 => ATmega 9 <br />
     - Common 14 11 7 10 6 => ATmega GND <br />
     
 
