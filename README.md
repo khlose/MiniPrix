@@ -22,9 +22,9 @@ ECE362 Mini Project
   4 digits 7 segment LEDs <br />
     - A 13 => ATmega 2 <br />
     - B 9 => ATmega 3 <br />
-    - C 4 => ATmega 7 <br />
-    - D 2 => ATmega 8 <br />
-    - E 1 => ATmega 9 <br />
+    - C 4 => ATmega 4 <br />
+    - D 2 => ATmega 5 <br />
+    - E 1 => ATmega 6 <br />
     - F 12 => ATmega 7 <br />
     - G 5 => ATmega 8 <br />
     - dp 3 => ATmega 9 <br />
