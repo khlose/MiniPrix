@@ -67,29 +67,50 @@
 /* All functions after main should be initialized here */
 char inchar(void);
 void outchar(char x);
+;
+
+void SpiInit(void);
+void IncrementTimer(void);
 
 void lcdwait(void);
 void putcspi(char);
 void putsspi(char[]);
+void ShiftOutTime(void);
+
+/* Variable declarations */
 
 /*spi test variable*/
 char tmp;
 
 char SampleChar;
 
-
 char onesec = 0;	// one second flag
 char tenths	= 0;	// tenth of a second flag
-char tin	= 0;	// SCI transmit display buffer IN pointer
-char tout	= 0;	// SCI transmit display buffer OUT pointer
-int pulscnt 	= 0;	// pulse count (read from PA every second)
 int tencnt = 0;
 int onecnt = 0;
 
-void SpiInit(void);
-/* Variable declarations */
 
-   	   			 		  			 		       
+
+
+// PUSHBUTTONS
+int prev_leftpb = 0; // Previous left pushbutton state
+int prev_rghtpb = 0; // Previous right pushbutton state
+int RTICNT = 0;
+
+// Status Bits 
+int start = 0;   // Status that the clock has started/stopped 0 -> stopped , 1 -> started
+
+//char time[4] ={0};
+char ten_sec=0;
+char ten_min=0;
+char one_sec=0;
+char one_min=0;
+/*Look up table for LED segment, 8 bits = 8 segmented from left to right DP G F E... B A*/
+/*led_rep[0] = segmented needed to display number 0 on 7 segmented LEDs*/
+char led_rep[10] = { 0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F};
+
+
+
 
 /* Special ASCII characters */
 #define CR 0x0D		// ASCII return 
@@ -137,12 +158,19 @@ void  initializations(void) {
   PORTB  =  0x10; //assert DTR pin on COM port
 
 /* Initialize peripherals */
-
+  /*Timer Initialization*/
+  
+  /*
+  ten_min = &time[3];
+  one_min = &time[2];
+  ten_sec = &time[1];
+  one_sec = &time[0];
+  */
+  
             
 /* Initialize interrupts */
-
-  /*TIM*/
-  
+         
+  /*TIM*/  
   DDRT = 0xFF;
   TSCR1 = 0x80;
   TSCR2 = 0x0C;
@@ -150,29 +178,21 @@ void  initializations(void) {
   TIE = 0x80;
   TC7 = 1500;
   
-  
+ /* ATD */
+  DDRAD = 0;
+  ATDCTL2 = 0x80;
+  ATDCTL3 = 0x10;
+  ATDCTL4 = 0x85;
+  ATDDIEN = 0xC0;
+  RTICTL = 0x1F;
+  CRGINT = 0x80;
+ 
   /*SPI*/
-  
-  
-  
   DDRM = 0xFF;
-  
-  /*
-  PTM_PTM2 = 0;
-  PTM_PTM5 = 0; //SCK low
-  PTM_PTM4 = 0; //MOSI low
-  PTM_PTM3 = 1; //SS high
-  */
   SPICR1 = 0x50;
   SPICR2 = 0x02; // should probably be 0x00
   SPIBR = 0x77; //options are 0x00 and 0x60
-  //WOMM = 0x00; //enable port M pull up
-  /*
-  PTM_PTM2 = 1;
-  PTM_PTM3 = 1;
-  PTM_PTM4 = 1;
-  PTM_PTM5 = 1;
-  */
+
 	      
 }
 
@@ -186,21 +206,21 @@ void main(void) {
   	DisableInterrupts
 	initializations(); 		  			 		  		
 	EnableInterrupts;
-  
-
-    
-  //putsspi("Hello, World");
-                 
-  
 
   
  for(;;) {
-  
-  
-  if(onesec == 1){
-    putcspi('b');
-    onesec = 0;
-  
+  if(start == 1) 
+  {  
+    if(onesec == 1)
+    {
+      //putcspi('b');
+      //putcspi('c');
+      onesec = 0;
+      
+      ShiftOutTime();
+      IncrementTimer();
+    }
+    
   }
   
   
@@ -219,9 +239,22 @@ void main(void) {
 
 interrupt 7 void RTI_ISR(void)
 {
-  	// clear RTI interrupt flagt 
-  	CRGFLG = CRGFLG | 0x80; 
- 
+  	// clear RTI interrupt flag
+  	CRGFLG = CRGFLG | 0x80;
+  	RTICNT++;
+  	if(RTICNT>=48){
+  	  RTICNT = 0;
+  	}
+  	if(prev_leftpb == 1 && PTAD_PTAD7==0){
+      start = 1;
+      
+    }
+    if(prev_rghtpb == 1 && PTAD_PTAD6==0){
+      start = 0;
+      
+    }
+    prev_rghtpb = PTAD_PTAD6;
+    prev_leftpb = PTAD_PTAD7;
 
 }
 
@@ -243,11 +276,7 @@ interrupt 15 void TIM_ISR(void)
  	}
  	if(onecnt >= 1000){ //100 of 10 ms = 1 sec
  	  onecnt = 0;
- 	  onesec = 1;
- 	  
- 	  
- 	  
- 	  
+ 	  onesec = 1; 	  
  	}
 }
 
@@ -308,17 +337,13 @@ void lcdwait()
 }
 
 void putcspi(char cx) {
-  
-  
+    
   char temp;
-  //while(!(SPISR & SPISR_SPTEF));
   PTM_PTM3 = 0;
   while(!SPISR_SPTEF);
-  //while(!(SPISR & SPISR_SPTEF));
   SPIDR = cx;
   lcdwait();
   while(!SPISR_SPIF);
-  //while(!(SPISR & SPISR_SPTEF));
   temp = SPIDR;
   PTM_PTM3 = 1;
 }
@@ -329,6 +354,48 @@ void putsspi(char* ptr){
     putcspi(*ptr);
     ptr++; 
   }
+}
+
+void ShiftOutTime(void){
+
+  char temp;
+  PTM_PTM3 = 0;
+  
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+one_sec;
+  SPIDR = led_rep[one_sec];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+ten_sec;
+  SPIDR = led_rep[ten_sec];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+one_min;
+  SPIDR = led_rep[one_min];
+  lcdwait();  
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  //SPIDR = 0x30+ten_min;
+  SPIDR = led_rep[ten_min];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+one_sec;
+  SPIDR = '\n';
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  PTM_PTM3 = 1;  
+
+
 }
 
 char getcspi(void){
@@ -344,4 +411,33 @@ void getsspi(char* ptr, char count){
     count--;
   }
   *ptr = 0;
+}
+
+
+void IncrementTimer(void){
+  one_sec++;
+  if(one_sec > 9)
+  {
+    one_sec = 0;
+    ten_sec++;
+    if(ten_sec > 5)
+    {
+      ten_sec = 0;
+      one_min++;
+      if(one_min > 9)
+      {
+        one_min = 0;
+        ten_min++;
+        if(ten_min > 5)
+        {
+          ten_min = 0;
+          one_min = 0;
+          ten_sec = 0;
+          one_sec = 0;
+        }  
+        
+      } 
+    }
+  }
+
 }
