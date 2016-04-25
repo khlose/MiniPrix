@@ -1,6 +1,6 @@
 #include <SPI.h>
 
-char buf[100] = {0x3F};
+char buf[100] = {0x3F,0x3F,0x3F,0x3F};
 volatile byte pos;
 volatile bool process_it;
 

@@ -63,11 +63,11 @@
 #include <hidef.h>      /* common defines and macros */
 #include "derivative.h"      /* derivative-specific definitions */
 #include <mc9s12c32.h>
+#include "flash.h"
 
-/* All functions after main should be initialized here */
+/****************** All functions after main should be initialized here ********************/
 char inchar(void);
 void outchar(char x);
-;
 
 void SpiInit(void);
 void IncrementTimer(void);
@@ -76,40 +76,90 @@ void lcdwait(void);
 void putcspi(char);
 void putsspi(char[]);
 void ShiftOutTime(void);
+void ShiftOutTimeDummy(void);
 
-/* Variable declarations */
+/******************************************************************************************/
 
-/*spi test variable*/
-char tmp;
 
-char SampleChar;
 
+/****************************** Variable declarations ********************************/
+
+/*TIM ISR related variables*/
 char onesec = 0;	// one second flag
 char tenths	= 0;	// tenth of a second flag
 int tencnt = 0;
 int onecnt = 0;
 
 
+/* Push button states */
 
-
-// PUSHBUTTONS
 int prev_leftpb = 0; // Previous left pushbutton state
 int prev_rghtpb = 0; // Previous right pushbutton state
+int prev_ready1 = 0; 
+int prev_ready2 = 0;
+int prev_finish1 = 0;
+int prev_finish2 = 0;
+
 int RTICNT = 0;
 
-// Status Bits 
+/* Status variables*/
 int start = 0;   // Status that the clock has started/stopped 0 -> stopped , 1 -> started
+int player1_ready = 0;
+int player2_ready = 0;
+int player1_finish = 0;
+int player2_finish = 0;
+int cars_released = 0;
+int is_time1_recorded = 0;
+int is_time2_recorded = 0;
 
-//char time[4] ={0};
-char ten_sec=0;
-char ten_min=0;
-char one_sec=0;
-char one_min=0;
-/*Look up table for LED segment, 8 bits = 8 segmented from left to right DP G F E... B A*/
+
+/* Timer variables */
+char ten_sec = 0; // MM:"S"S
+char ten_min = 0; // "M"M:SS
+char one_sec = 0; // MM:S"S"
+char one_min = 0; // M"M":SS
+
+char ten_sec_finish2 = 0;
+char one_sec_finish2 = 0;
+char ten_min_finish2 = 0;
+char one_min_finish2 = 0;
+
+char ten_sec_finish1 = 0;
+char one_sec_finish1 = 0;
+char ten_min_finish1 = 0;
+char one_min_finish1 = 0;
+
+char ten_sec_record = 0;
+char one_sec_record = 0;
+char ten_min_record = 0;
+char one_min_record = 0;
+
+
+
+/* LOOK UP TABLE FOR CHAR TO BE SHIFTED OUT*/
+
+/* 8 bits = 8 segmented from left to right DP G F E... B A*/
 /*led_rep[0] = segmented needed to display number 0 on 7 segmented LEDs*/
 char led_rep[10] = { 0x3F,0x06,0x5B,0x4F,0x66,0x6D,0x7D,0x07,0x7F,0x6F};
 
 
+/*flash storage*/
+
+int rval = 0; // return value from writing
+
+
+/*Debug*/
+char tm=5;
+char om = 4;
+char ts = 3;
+char os = 2;
+
+int m = 0;
+int s = 0;
+
+
+
+/***************************************************************************************/
 
 
 /* Special ASCII characters */
@@ -158,14 +208,6 @@ void  initializations(void) {
   PORTB  =  0x10; //assert DTR pin on COM port
 
 /* Initialize peripherals */
-  /*Timer Initialization*/
-  
-  /*
-  ten_min = &time[3];
-  one_min = &time[2];
-  ten_sec = &time[1];
-  one_sec = &time[0];
-  */
   
             
 /* Initialize interrupts */
@@ -183,7 +225,10 @@ void  initializations(void) {
   ATDCTL2 = 0x80;
   ATDCTL3 = 0x10;
   ATDCTL4 = 0x85;
-  ATDDIEN = 0xC0;
+  
+  //ch01 34
+  ATDDIEN = 0b11011011;
+  
   RTICTL = 0x1F;
   CRGINT = 0x80;
  
@@ -192,8 +237,33 @@ void  initializations(void) {
   SPICR1 = 0x50;
   SPICR2 = 0x02; // should probably be 0x00
   SPIBR = 0x77; //options are 0x00 and 0x60
+  
+  
+  /*Flash storage*/
+  Flash_Init(8000);
+  
+  if(*(unsigned int*)0x4000 == 0xFFFF){
+    //default value is 0xFFFF, nothing is stored
+    ten_sec_record = 0;
+    one_sec_record = 0;
+    ten_min_record = 0;
+    one_min_record = 0;
+  } else{
+    //high score was recorded
+    rval = Flash_Erase_Sector((unsigned int *)0x4000);
+    //location 0x4000 | 0x4001 = ten min | one min
+    ten_min_record = (*(unsigned char*)0x4000);
+    one_min_record = (*(unsigned char*)0x4001);
+    ten_sec_record = (*(unsigned char*)0x4002);
+    one_sec_record = (*(unsigned char*)0x4003);
+  
+  }
 
-	      
+
+  
+  
+
+
 }
 
 	 		  			 		  		
@@ -207,24 +277,95 @@ void main(void) {
 	initializations(); 		  			 		  		
 	EnableInterrupts;
 
+
+  //MC9S12C32 is using 8MHZ oscillator
   
- for(;;) {
-  if(start == 1) 
-  {  
-    if(onesec == 1)
-    {
-      //putcspi('b');
-      //putcspi('c');
-      onesec = 0;
-      
-      ShiftOutTime();
-      IncrementTimer();
-    }
-    
+  Flash_Init(8000);
+  
+  if(*(unsigned int*)0x4000 == 0xFFFF){
+    rval = Flash_Erase_Sector((unsigned int *)0x4000);
+  
+    m = (int)tm << 8 | om;
+    s = (int)ts << 8 | os;
+    rval = Flash_Write_Word((unsigned int *)0x4000,m);
+    rval = Flash_Write_Word((unsigned int *)0x4002,s);  
+
   }
   
   
-   } /* loop forever */
+ for(;;) {
+  
+  
+  if(player1_ready == 1 && player2_ready == 1 && start == 0){
+    start = 1;
+  }
+   
+  if(start == 1)
+  {  
+    if(onesec == 1)
+    {
+      onesec = 0;
+      
+      //shift time out to main display (#0)
+      ShiftOutTime();
+      
+      IncrementTimer();
+    }
+    if(cars_released == 0){
+      //set solenoid out pin high
+      
+      //wait 5 secs
+      //set the pin low
+      
+      //make sure solenoid won't be activated again
+      cars_released = 1;
+      
+    }
+    
+  }
+  if(player1_finish == 1 && is_time1_recorded == 0){
+    ten_sec_finish1 = ten_sec;
+    one_sec_finish1 = one_sec;
+    ten_min_finish1 = ten_min;
+    one_min_finish1 = one_min;
+    is_time1_recorded = 1;
+    //shift out time to display #1
+        
+  }
+  if(player2_finish == 1 && is_time2_recorded == 0){
+    ten_sec_finish2 = ten_sec;
+    one_sec_finish2 = one_sec;
+    ten_min_finish2 = ten_min;
+    one_min_finish2 = one_min;
+    is_time2_recorded =1;
+    //shift out time to display #2
+        
+  }
+  
+  if(player1_finish == 1 && player2_finish == 1){
+    //race ended, reset everything
+    start = 0;
+    player1_ready = 0;
+    player2_ready = 0;
+    player1_finish = 0;
+    player2_finish = 0;
+    //be careful here, this statement will mess with solenoid
+    cars_released = 0;
+    is_time2_recorded = 0;
+    is_time1_recorded = 0;
+    ten_sec = 0;
+    ten_min = 0;
+    one_sec = 0;
+    one_min = 0;
+  
+    
+  
+  }
+  
+  // Do we need reset button? resest all status holding variables and everything
+  
+  
+ }/* loop forever */
    
 }   /* do not leave main */
 
@@ -245,16 +386,43 @@ interrupt 7 void RTI_ISR(void)
   	if(RTICNT>=48){
   	  RTICNT = 0;
   	}
-  	if(prev_leftpb == 1 && PTAD_PTAD7==0){
+  	/*
+  	if(prev_leftpb == 1 && PTAD_PTAD7 == 0){
       start = 1;
       
     }
-    if(prev_rghtpb == 1 && PTAD_PTAD6==0){
-      start = 0;
-      
+    if(prev_rghtpb == 1 && PTAD_PTAD6 == 0){
+      start = 0; 
     }
+    */
+    if(prev_ready1 == 1 && PTAD_PTAD0 == 0){
+      if(player1_ready == 1){
+        player1_ready = 0;
+      } else{
+        player1_ready = 1;
+      }  
+    }
+    if(prev_ready2 == 1 && PTAD_PTAD1 == 0){
+      if(player2_ready == 1){
+        player2_ready = 0;
+      } else{
+        player2_ready = 1;
+      }
+    }
+    
+    if(prev_finish1 == 1 && PTAD_PTAD3 == 0){
+      player1_finish = 1;  
+    }
+    if(prev_finish2 == 1 && PTAD_PTAD4 == 0){
+      player2_finish = 1;
+    }
+    
     prev_rghtpb = PTAD_PTAD6;
     prev_leftpb = PTAD_PTAD7;
+    prev_ready1 = PTAD_PTAD0;
+    prev_ready2 = PTAD_PTAD1;
+    prev_finish1 = PTAD_PTAD3;
+    prev_finish2 = PTAD_PTAD4;
 
 }
 
@@ -398,6 +566,50 @@ void ShiftOutTime(void){
 
 }
 
+
+void ShiftOutTimeDummy(void){
+
+  char temp;
+  PTM_PTM3 = 0;
+  
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+one_sec;
+  SPIDR = led_rep[one_sec_record];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+ten_sec;
+  SPIDR = led_rep[ten_sec_record];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+one_min;
+  SPIDR = led_rep[one_min_record];
+  lcdwait();  
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  //SPIDR = 0x30+ten_min;
+  SPIDR = led_rep[ten_min_record];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  while(!SPISR_SPTEF);
+  //SPIDR = 0x30+one_sec;
+  SPIDR = '\n';
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  PTM_PTM3 = 1;  
+
+
+}
+
+
 char getcspi(void){
   while(!(SPISR & SPISR_SPTEF));
   SPIDR = 0x00;
@@ -441,3 +653,12 @@ void IncrementTimer(void){
   }
 
 }
+
+
+/*********************************************************************************************************
+                                                                                                       
+Stor the best record in 2 words(16-bit data) min,sec
+min = 0x00 | tenmin<<8 | onemin>>8;
+same goes for sec 
+
+**********************************************************************************************************/
