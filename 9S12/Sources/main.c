@@ -133,7 +133,8 @@ char ten_sec_record = 0;
 char one_sec_record = 0;
 char ten_min_record = 0;
 char one_min_record = 0;
-
+int whole_min_record = 0;
+int whole_sec_record = 0;
 
 
 /* LOOK UP TABLE FOR CHAR TO BE SHIFTED OUT*/
@@ -153,10 +154,9 @@ char tm=5;
 char om = 4;
 char ts = 3;
 char os = 2;
-
 int m = 0;
 int s = 0;
-
+int debug_store=0;
 
 
 /***************************************************************************************/
@@ -250,7 +250,6 @@ void  initializations(void) {
     one_min_record = 0;
   } else{
     //high score was recorded
-    rval = Flash_Erase_Sector((unsigned int *)0x4000);
     //location 0x4000 | 0x4001 = ten min | one min
     ten_min_record = (*(unsigned char*)0x4000);
     one_min_record = (*(unsigned char*)0x4001);
@@ -258,6 +257,7 @@ void  initializations(void) {
     one_sec_record = (*(unsigned char*)0x4003);
   
   }
+  ShiftOutTimeDummy();
 
 
   
@@ -362,6 +362,19 @@ void main(void) {
   
   }
   
+  //using left push button to increment one digit of stored second
+  if(debug_store == 1){
+    debug_store = 0;
+    om++;
+    rval = Flash_Erase_Sector((unsigned int *)0x4000);
+  
+    m = (int)tm << 8 | om;
+    s = (int)ts << 8 | os;
+    rval = Flash_Write_Word((unsigned int *)0x4000,m);
+    rval = Flash_Write_Word((unsigned int *)0x4002,s);
+    
+  }
+  
   // Do we need reset button? resest all status holding variables and everything
   
   
@@ -386,15 +399,15 @@ interrupt 7 void RTI_ISR(void)
   	if(RTICNT>=48){
   	  RTICNT = 0;
   	}
-  	/*
+  	
   	if(prev_leftpb == 1 && PTAD_PTAD7 == 0){
-      start = 1;
+      debug_store = 1;
       
     }
     if(prev_rghtpb == 1 && PTAD_PTAD6 == 0){
-      start = 0; 
+      debug_store = 0; 
     }
-    */
+    
     if(prev_ready1 == 1 && PTAD_PTAD0 == 0){
       if(player1_ready == 1){
         player1_ready = 0;

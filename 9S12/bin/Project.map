@@ -26,8 +26,8 @@ Entry point: 0xC029 (_Startup)
 _startupData is allocated at 0xC031 and uses 6 Bytes
 extern struct _tagStartup {
   unsigned nofZeroOut     1
-  _Range   pZeroOut       0x900     72
-  _Copy    *toCopyDownBeg 0xC5CF
+  _Range   pZeroOut       0x900     74
+  _Copy    *toCopyDownBeg 0xC63A
 } _startupData;
 
 *********************************************************************************************
@@ -36,8 +36,8 @@ Section Name                    Size  Type     From       To       Segment
 ---------------------------------------------------------------------------------------------
 .init                             49     R     0xC000     0xC030   ROM_C000
 .startData                        10     R     0xC031     0xC03A   ROM_C000
-.text                           1176     R     0xC03B     0xC4D2   ROM_C000
-.copy                             20     R     0xC5CF     0xC5E2   ROM_C000
+.text                           1283     R     0xC03B     0xC53D   ROM_C000
+.copy                             20     R     0xC63A     0xC64D   ROM_C000
 .stack                           256   R/W      0x800      0x8FF   RAM
 .data                             14   R/W      0x900      0x90D   RAM
 .abs_section_8                     1   N/I        0x8        0x8   .absSeg0
@@ -264,14 +264,14 @@ Section Name                    Size  Type     From       To       Segment
 .abs_section_fff0                  2     R     0xFFF0     0xFFF1   .absSeg221
 .abs_section_ffe0                  2     R     0xFFE0     0xFFE1   .absSeg222
 .abs_section_ffd6                  2     R     0xFFD6     0xFFD7   .absSeg223
-.bss                              58   R/W      0x90E      0x947   RAM
-RUNTIME                          204     R     0xC4D3     0xC59E   ROM_C000
-Do_On_Stack.asm._SEC000000         48     R     0xC59F     0xC5CE   ROM_C000
+.bss                              60   R/W      0x90E      0x949   RAM
+RUNTIME                          204     R     0xC53E     0xC609   ROM_C000
+Do_On_Stack.asm._SEC000000         48     R     0xC60A     0xC639   ROM_C000
 .vectSeg224_vect                   2     R     0xFFFE     0xFFFF   .vectSeg224
 
 Summary of section sizes per section type:
-READ_ONLY (R):         5EB (dec:     1515)
-READ_WRITE (R/W):      148 (dec:      328)
+READ_ONLY (R):         656 (dec:     1622)
+READ_WRITE (R/W):      14A (dec:      330)
 NO_INIT (N/I):         104 (dec:      260)
 
 *********************************************************************************************
@@ -352,8 +352,8 @@ MODULE:                 -- mc9s12c32.c.o --
      _SPICR1                                     D8       1       1       1   .abs_section_d8
      _SPICR2                                     D9       1       1       1   .abs_section_d9
      _SPIBR                                      DA       1       1       1   .abs_section_da
-     _SPISR                                      DB       1       1       9   .abs_section_db
-     _SPIDR                                      DD       1       1       7   .abs_section_dd
+     _SPISR                                      DB       1       1      18   .abs_section_db
+     _SPIDR                                      DD       1       1      14   .abs_section_dd
      _PWME                                       E0       1       1       0   .abs_section_e0
      _PWMPOL                                     E1       1       1       0   .abs_section_e1
      _PWMCLK                                     E2       1       1       0   .abs_section_e2
@@ -440,7 +440,7 @@ MODULE:                 -- mc9s12c32.c.o --
      _PERS                                      24C       1       1       0   .abs_section_24c
      _PPSS                                      24D       1       1       0   .abs_section_24d
      _WOMS                                      24E       1       1       0   .abs_section_24e
-     _PTM                                       250       1       1       2   .abs_section_250
+     _PTM                                       250       1       1       4   .abs_section_250
      _PTIM                                      251       1       1       0   .abs_section_251
      _DDRM                                      252       1       1       1   .abs_section_252
      _RDRM                                      253       1       1       0   .abs_section_253
@@ -463,7 +463,7 @@ MODULE:                 -- mc9s12c32.c.o --
      _PPSJ                                      26D       1       1       0   .abs_section_26d
      _PIEJ                                      26E       1       1       0   .abs_section_26e
      _PIFJ                                      26F       1       1       0   .abs_section_26f
-     _PTAD                                      270       1       1      10   .abs_section_270
+     _PTAD                                      270       1       1      12   .abs_section_270
      _PTIAD                                     271       1       1       0   .abs_section_271
      _DDRAD                                     272       1       1       1   .abs_section_272
      _RDRAD                                     273       1       1       0   .abs_section_273
@@ -510,26 +510,27 @@ MODULE:                 -- mc9s12c32.c.o --
      _CANTXTSR                                  17E       2       2       0   .abs_section_17e
 MODULE:                 -- main.c.o --
 - PROCEDURES:
-     initializations                           C03B      C6     198       1   .text       
-     main                                      C101     136     310       6   .text       
-     RTI_ISR                                   C237      B2     178       1   .text       
-     TIM_ISR                                   C2E9      2F      47       1   .text       
-     SCI_ISR                                   C318       1       1       1   .text       
-     lcdwait                                   C319      1F      31       2   .text       
-     ShiftOutTime                              C338      5D      93       1   .text       
-     IncrementTimer                            C395      3E      62       1   .text       
+     initializations                           C03B      A5     165       1   .text       
+     main                                      C0E0     144     324       4   .text       
+     RTI_ISR                                   C224      D3     211       1   .text       
+     TIM_ISR                                   C2F7      2F      47       1   .text       
+     SCI_ISR                                   C326       1       1       1   .text       
+     lcdwait                                   C327      1F      31       4   .text       
+     ShiftOutTime                              C346      5D      93       1   .text       
+     ShiftOutTimeDummy                         C3A3      5D      93       1   .text       
+     IncrementTimer                            C400      3E      62       1   .text       
 - VARIABLES:
-     led_rep                                    900       A      10       1   .data       
+     led_rep                                    900       A      10       2   .data       
      tm                                         90A       1       1       1   .data       
-     om                                         90B       1       1       1   .data       
+     om                                         90B       1       1       2   .data       
      ts                                         90C       1       1       1   .data       
      os                                         90D       1       1       1   .data       
      onesec                                     90E       1       1       3   .bss        
      tenths                                     90F       1       1       1   .bss        
      tencnt                                     910       2       2       3   .bss        
      onecnt                                     912       2       2       3   .bss        
-     prev_leftpb                                914       2       2       1   .bss        
-     prev_rghtpb                                916       2       2       1   .bss        
+     prev_leftpb                                914       2       2       2   .bss        
+     prev_rghtpb                                916       2       2       2   .bss        
      prev_ready1                                918       2       2       2   .bss        
      prev_ready2                                91A       2       2       2   .bss        
      prev_finish1                               91C       2       2       2   .bss        
@@ -543,10 +544,10 @@ MODULE:                 -- main.c.o --
      cars_released                              92C       2       2       3   .bss        
      is_time1_recorded                          92E       2       2       3   .bss        
      is_time2_recorded                          930       2       2       3   .bss        
-     ten_sec                                    932       1       1       9   .bss        
-     ten_min                                    933       1       1       8   .bss        
-     one_sec                                    934       1       1       9   .bss        
-     one_min                                    935       1       1       9   .bss        
+     ten_sec                                    932       1       1       8   .bss        
+     ten_min                                    933       1       1       7   .bss        
+     one_sec                                    934       1       1       8   .bss        
+     one_min                                    935       1       1       8   .bss        
      ten_sec_finish2                            936       1       1       1   .bss        
      one_sec_finish2                            937       1       1       1   .bss        
      ten_min_finish2                            938       1       1       1   .bss        
@@ -559,9 +560,10 @@ MODULE:                 -- main.c.o --
      one_sec_record                             93F       1       1       3   .bss        
      ten_min_record                             940       1       1       3   .bss        
      one_min_record                             941       1       1       3   .bss        
-     rval                                       942       2       2       4   .bss        
+     rval                                       942       2       2       3   .bss        
      m                                          944       2       2       2   .bss        
      s                                          946       2       2       2   .bss        
+     debug_store                                948       2       2       4   .bss        
      _Vector_7                                 FFF0       2       2       0   .abs_section_fff0
      _Vector_15                                FFE0       2       2       0   .abs_section_ffe0
      _Vector_20                                FFD6       2       2       0   .abs_section_ffd6
@@ -575,20 +577,20 @@ MODULE:                 -- Start12.c.o --
      __SEG_END_SSTACK                           900       0       0       1               
 MODULE:                 -- rtshc12.c.o (ansisi.lib) --
 - PROCEDURES:
-     _lDivMod                                  C4D3      BE     190       1   RUNTIME     
-     _LDIVU                                    C591       E      14       2   RUNTIME     
+     _lDivMod                                  C53E      BE     190       1   RUNTIME     
+     _LDIVU                                    C5FC       E      14       2   RUNTIME     
 - VARIABLES:
 MODULE:                 -- Do_On_Stack.asm.o --
 - PROCEDURES:
-     DoOnStack                                 C59F       4       4       2   Do_On_Stack.asm._SEC000000
-     SpmoveLoop                                C5A3      1A      26       0   Do_On_Stack.asm._SEC000000
-     SpSub                                     C5BD      12      18       1   Do_On_Stack.asm._SEC000000
+     DoOnStack                                 C60A       4       4       2   Do_On_Stack.asm._SEC000000
+     SpmoveLoop                                C60E      1A      26       0   Do_On_Stack.asm._SEC000000
+     SpSub                                     C628      12      18       1   Do_On_Stack.asm._SEC000000
 - VARIABLES:
 MODULE:                 -- flash.c.o --
 - PROCEDURES:
-     Flash_Init                                C3D3      56      86       2   .text       
-     Flash_Write_Word                          C429      54      84       2   .text       
-     Flash_Erase_Sector                        C47D      56      86       2   .text       
+     Flash_Init                                C43E      56      86       2   .text       
+     Flash_Write_Word                          C494      54      84       2   .text       
+     Flash_Erase_Sector                        C4E8      56      86       1   .text       
 - VARIABLES:
 
 *********************************************************************************************
@@ -596,7 +598,7 @@ MODULE STATISTIC
   Name                                      Data   Code  Const
 ---------------------------------------------------------------------------------------------
   mc9s12c32.c.o                              260      0      0
-  main.c.o                                    72    920      6
+  main.c.o                                    74   1027      6
   Start12.c.o                                  0     49      0
   rtshc12.c.o (ansisi.lib)                     0    204      0
   Do_On_Stack.asm.o                            0     48      0
@@ -608,7 +610,8 @@ SECTION USE IN OBJECT-ALLOCATION SECTION
 ---------------------------------------------------------------------------------------------
 SECTION: ".text"
   initializations main RTI_ISR TIM_ISR SCI_ISR lcdwait ShiftOutTime 
-  IncrementTimer Flash_Init Flash_Write_Word Flash_Erase_Sector 
+  ShiftOutTimeDummy IncrementTimer Flash_Init Flash_Write_Word 
+  Flash_Erase_Sector 
 SECTION: ".data"
   led_rep tm om ts os 
 SECTION: ".bss"
@@ -618,7 +621,7 @@ SECTION: ".bss"
   is_time2_recorded ten_sec ten_min one_sec one_min ten_sec_finish2 
   one_sec_finish2 ten_min_finish2 one_min_finish2 ten_sec_finish1 
   one_sec_finish1 ten_min_finish1 one_min_finish1 ten_sec_record one_sec_record 
-  ten_min_record one_min_record rval m s 
+  ten_min_record one_min_record rval m s debug_store 
 SECTION: ".init"
   Init _Startup 
 SECTION: ".abs_section_8"
@@ -1171,8 +1174,8 @@ OBJECT LIST SORTED BY ADDRESS
      _SPICR1                                     D8       1       1       1   .abs_section_d8
      _SPICR2                                     D9       1       1       1   .abs_section_d9
      _SPIBR                                      DA       1       1       1   .abs_section_da
-     _SPISR                                      DB       1       1       9   .abs_section_db
-     _SPIDR                                      DD       1       1       7   .abs_section_dd
+     _SPISR                                      DB       1       1      18   .abs_section_db
+     _SPIDR                                      DD       1       1      14   .abs_section_dd
      _PWME                                       E0       1       1       0   .abs_section_e0
      _PWMPOL                                     E1       1       1       0   .abs_section_e1
      _PWMCLK                                     E2       1       1       0   .abs_section_e2
@@ -1270,7 +1273,7 @@ OBJECT LIST SORTED BY ADDRESS
      _PERS                                      24C       1       1       0   .abs_section_24c
      _PPSS                                      24D       1       1       0   .abs_section_24d
      _WOMS                                      24E       1       1       0   .abs_section_24e
-     _PTM                                       250       1       1       2   .abs_section_250
+     _PTM                                       250       1       1       4   .abs_section_250
      _PTIM                                      251       1       1       0   .abs_section_251
      _DDRM                                      252       1       1       1   .abs_section_252
      _RDRM                                      253       1       1       0   .abs_section_253
@@ -1293,23 +1296,23 @@ OBJECT LIST SORTED BY ADDRESS
      _PPSJ                                      26D       1       1       0   .abs_section_26d
      _PIEJ                                      26E       1       1       0   .abs_section_26e
      _PIFJ                                      26F       1       1       0   .abs_section_26f
-     _PTAD                                      270       1       1      10   .abs_section_270
+     _PTAD                                      270       1       1      12   .abs_section_270
      _PTIAD                                     271       1       1       0   .abs_section_271
      _DDRAD                                     272       1       1       1   .abs_section_272
      _RDRAD                                     273       1       1       0   .abs_section_273
      _PERAD                                     274       1       1       0   .abs_section_274
      _PPSAD                                     275       1       1       0   .abs_section_275
-     led_rep                                    900       A      10       1   .data       
+     led_rep                                    900       A      10       2   .data       
      tm                                         90A       1       1       1   .data       
-     om                                         90B       1       1       1   .data       
+     om                                         90B       1       1       2   .data       
      ts                                         90C       1       1       1   .data       
      os                                         90D       1       1       1   .data       
      onesec                                     90E       1       1       3   .bss        
      tenths                                     90F       1       1       1   .bss        
      tencnt                                     910       2       2       3   .bss        
      onecnt                                     912       2       2       3   .bss        
-     prev_leftpb                                914       2       2       1   .bss        
-     prev_rghtpb                                916       2       2       1   .bss        
+     prev_leftpb                                914       2       2       2   .bss        
+     prev_rghtpb                                916       2       2       2   .bss        
      prev_ready1                                918       2       2       2   .bss        
      prev_ready2                                91A       2       2       2   .bss        
      prev_finish1                               91C       2       2       2   .bss        
@@ -1323,10 +1326,10 @@ OBJECT LIST SORTED BY ADDRESS
      cars_released                              92C       2       2       3   .bss        
      is_time1_recorded                          92E       2       2       3   .bss        
      is_time2_recorded                          930       2       2       3   .bss        
-     ten_sec                                    932       1       1       9   .bss        
-     ten_min                                    933       1       1       8   .bss        
-     one_sec                                    934       1       1       9   .bss        
-     one_min                                    935       1       1       9   .bss        
+     ten_sec                                    932       1       1       8   .bss        
+     ten_min                                    933       1       1       7   .bss        
+     one_sec                                    934       1       1       8   .bss        
+     one_min                                    935       1       1       8   .bss        
      ten_sec_finish2                            936       1       1       1   .bss        
      one_sec_finish2                            937       1       1       1   .bss        
      ten_min_finish2                            938       1       1       1   .bss        
@@ -1339,28 +1342,30 @@ OBJECT LIST SORTED BY ADDRESS
      one_sec_record                             93F       1       1       3   .bss        
      ten_min_record                             940       1       1       3   .bss        
      one_min_record                             941       1       1       3   .bss        
-     rval                                       942       2       2       4   .bss        
+     rval                                       942       2       2       3   .bss        
      m                                          944       2       2       2   .bss        
      s                                          946       2       2       2   .bss        
+     debug_store                                948       2       2       4   .bss        
      Init                                      C000      29      41       1   .init       
      _Startup                                  C029       8       8       0   .init       
-     initializations                           C03B      C6     198       1   .text       
-     main                                      C101     136     310       6   .text       
-     RTI_ISR                                   C237      B2     178       1   .text       
-     TIM_ISR                                   C2E9      2F      47       1   .text       
-     SCI_ISR                                   C318       1       1       1   .text       
-     lcdwait                                   C319      1F      31       2   .text       
-     ShiftOutTime                              C338      5D      93       1   .text       
-     IncrementTimer                            C395      3E      62       1   .text       
-     Flash_Init                                C3D3      56      86       2   .text       
-     Flash_Write_Word                          C429      54      84       2   .text       
-     Flash_Erase_Sector                        C47D      56      86       2   .text       
-     _lDivMod                                  C4D3      BE     190       1   RUNTIME     
-     _LDIVU                                    C591       E      14       2   RUNTIME     
-     DoOnStack                                 C59F       4       4       2   Do_On_Stack.asm._SEC000000
-     SpmoveLoop                                C5A3      1A      26       0   Do_On_Stack.asm._SEC000000
-     SpSub                                     C5BD      12      18       1   Do_On_Stack.asm._SEC000000
-     SpSubEnd                                  C5CF       0       0       1   Do_On_Stack.asm._SEC000000
+     initializations                           C03B      A5     165       1   .text       
+     main                                      C0E0     144     324       4   .text       
+     RTI_ISR                                   C224      D3     211       1   .text       
+     TIM_ISR                                   C2F7      2F      47       1   .text       
+     SCI_ISR                                   C326       1       1       1   .text       
+     lcdwait                                   C327      1F      31       4   .text       
+     ShiftOutTime                              C346      5D      93       1   .text       
+     ShiftOutTimeDummy                         C3A3      5D      93       1   .text       
+     IncrementTimer                            C400      3E      62       1   .text       
+     Flash_Init                                C43E      56      86       2   .text       
+     Flash_Write_Word                          C494      54      84       2   .text       
+     Flash_Erase_Sector                        C4E8      56      86       1   .text       
+     _lDivMod                                  C53E      BE     190       1   RUNTIME     
+     _LDIVU                                    C5FC       E      14       2   RUNTIME     
+     DoOnStack                                 C60A       4       4       2   Do_On_Stack.asm._SEC000000
+     SpmoveLoop                                C60E      1A      26       0   Do_On_Stack.asm._SEC000000
+     SpSub                                     C628      12      18       1   Do_On_Stack.asm._SEC000000
+     SpSubEnd                                  C63A       0       0       1   Do_On_Stack.asm._SEC000000
      _Vector_20                                FFD6       2       2       0   .abs_section_ffd6
      _Vector_15                                FFE0       2       2       0   .abs_section_ffe0
      _Vector_7                                 FFF0       2       2       0   .abs_section_fff0
@@ -1370,7 +1375,7 @@ UNUSED-OBJECTS SECTION
 ---------------------------------------------------------------------------------------------
 NOT USED PROCEDURES
 main.c.o:
-  inchar outchar putcspi putsspi ShiftOutTimeDummy getcspi getsspi 
+  inchar outchar putcspi putsspi getcspi getsspi 
 rtshc12.c.o (ansisi.lib):
   _BSHL _BSHRS _BSHRU _BDIVMODU _BDIVMODS _ISHL _ISHRU _ISHRS _LSHL _LSHRU 
   _LSHRS _LADD _LSUB _LAND _LOR _LXOR _LCMP _LCMP_P _LCMP_PP _LNEG _LCOM _LINC 
@@ -1378,31 +1383,33 @@ rtshc12.c.o (ansisi.lib):
   _CASE_DIRECT _CASE_DIRECT_BYTE _CASE_CHECKED _CASE_CHECKED_BYTE _CASE_SEARCH 
   _CASE_SEARCH_BYTE _CASE_SEARCH_8 _CASE_SEARCH_8_BYTE _FCALL _FPCMP 
 NOT USED VARIABLES
+main.c.o:
+  whole_min_record whole_sec_record 
 rtshc12.c.o (ansisi.lib):
   _PowOfTwo_8 _PowOfTwo_16 _PowOfTwo_32 errno 
 
 *********************************************************************************************
 COPYDOWN SECTION
 ---------------------------------------------------------------------------------------------
-------- ROM-ADDRESS: 0xC5CF ---- SIZE       4 ---
+------- ROM-ADDRESS: 0xC63A ---- SIZE       4 ---
 Filling bytes inserted
  000E0900
-------- ROM-ADDRESS: 0xC5D3 ---- RAM-ADDRESS: 0x900 ---- SIZE      10 ---
+------- ROM-ADDRESS: 0xC63E ---- RAM-ADDRESS: 0x900 ---- SIZE      10 ---
 Name of initialized Object : led_rep
  3F065B4F66 6D7D077F6F
-------- ROM-ADDRESS: 0xC5DD ---- RAM-ADDRESS: 0x90A ---- SIZE       1 ---
+------- ROM-ADDRESS: 0xC648 ---- RAM-ADDRESS: 0x90A ---- SIZE       1 ---
 Name of initialized Object : tm
  05
-------- ROM-ADDRESS: 0xC5DE ---- RAM-ADDRESS: 0x90B ---- SIZE       1 ---
+------- ROM-ADDRESS: 0xC649 ---- RAM-ADDRESS: 0x90B ---- SIZE       1 ---
 Name of initialized Object : om
  04
-------- ROM-ADDRESS: 0xC5DF ---- RAM-ADDRESS: 0x90C ---- SIZE       1 ---
+------- ROM-ADDRESS: 0xC64A ---- RAM-ADDRESS: 0x90C ---- SIZE       1 ---
 Name of initialized Object : ts
  03
-------- ROM-ADDRESS: 0xC5E0 ---- RAM-ADDRESS: 0x90D ---- SIZE       1 ---
+------- ROM-ADDRESS: 0xC64B ---- RAM-ADDRESS: 0x90D ---- SIZE       1 ---
 Name of initialized Object : os
  02
-------- ROM-ADDRESS: 0xC5E1 ---- SIZE       2 ---
+------- ROM-ADDRESS: 0xC64C ---- SIZE       2 ---
 Filling bytes inserted
  0000
 
@@ -1416,22 +1423,24 @@ initializations           USES _CLKSEL _PLLCTL _SYNR _REFDV _CRGFLG _COPCTL
                                 _TSCR2 _TIOS _TIE _TC7 _DDRAD _ATDCTL23 _ATDCTL45 
                                 _ATDDIEN _RTICTL _CRGINT _DDRM _SPICR1 _SPICR2 _SPIBR 
                                 Flash_Init ten_sec_record one_sec_record ten_min_record 
-                                one_min_record Flash_Erase_Sector rval ten_min one_min 
-                                ten_sec one_sec 
-main                      USES initializations Flash_Init main 
-                                Flash_Erase_Sector rval tm om m ts os s Flash_Write_Word 
-                                player1_ready player2_ready start onesec ShiftOutTime 
-                                IncrementTimer cars_released player1_finish is_time1_recorded 
-                                ten_sec ten_sec_finish1 one_sec one_sec_finish1 
-                                ten_min ten_min_finish1 one_min one_min_finish1 
-                                player2_finish is_time2_recorded ten_sec_finish2 
-                                one_sec_finish2 ten_min_finish2 one_min_finish2 
-RTI_ISR                   USES _CRGFLG RTICNT prev_ready1 _PTAD player1_ready 
-                                prev_ready2 player2_ready prev_finish1 player1_finish 
-                                prev_finish2 player2_finish prev_rghtpb prev_leftpb 
+                                one_min_record ShiftOutTimeDummy 
+main                      USES initializations Flash_Init main player1_ready 
+                                player2_ready start onesec ShiftOutTime IncrementTimer 
+                                cars_released player1_finish is_time1_recorded ten_sec 
+                                ten_sec_finish1 one_sec one_sec_finish1 ten_min 
+                                ten_min_finish1 one_min one_min_finish1 player2_finish 
+                                is_time2_recorded ten_sec_finish2 one_sec_finish2 
+                                ten_min_finish2 one_min_finish2 debug_store om 
+                                Flash_Erase_Sector rval tm m ts os s Flash_Write_Word 
+RTI_ISR                   USES _CRGFLG RTICNT prev_leftpb _PTAD debug_store 
+                                prev_rghtpb prev_ready1 player1_ready prev_ready2 
+                                player2_ready prev_finish1 player1_finish prev_finish2 
+                                player2_finish 
 TIM_ISR                   USES _TFLG1 tencnt onecnt tenths onesec 
 ShiftOutTime              USES _PTM _SPISR one_sec _SPIDR ten_sec one_min 
                                 ten_min lcdwait led_rep 
+ShiftOutTimeDummy         USES _PTM _SPISR one_sec_record _SPIDR 
+                                ten_sec_record one_min_record ten_min_record lcdwait led_rep 
 IncrementTimer            USES one_sec ten_sec one_min ten_min 
 Flash_Init                USES _LDIVU _FCLKDIV _FPROT _FSTAT 
 Flash_Write_Word          USES _FSTAT _FCMD DoOnStack 
@@ -1458,24 +1467,26 @@ DEPENDENCY TREE
  |  |  |     | 
  |  |  |     +- _lDivMod            
  |  |  |          
- |  |  +- Flash_Erase_Sector  
+ |  |  +- ShiftOutTimeDummy   
  |  |     | 
- |  |     +- DoOnStack           
+ |  |     +- lcdwait             
  |  |          
  |  +- Flash_Init           (see above)
  |  |  
- |  +- Flash_Erase_Sector   (see above)
- |  |  
- |  +- Flash_Write_Word    
- |  |  | 
- |  |  +- DoOnStack            (see above)
- |  |     
  |  +- ShiftOutTime        
  |  |  | 
- |  |  +- lcdwait             
- |  |       
+ |  |  +- lcdwait              (see above)
+ |  |     
  |  +- IncrementTimer      
- |       
+ |  |    
+ |  +- Flash_Erase_Sector  
+ |  |  | 
+ |  |  +- DoOnStack           
+ |  |       
+ |  +- Flash_Write_Word    
+ |     | 
+ |     +- DoOnStack            (see above)
+ |        
  +- _Startup            
     | 
     +- Init                
@@ -1500,6 +1511,6 @@ STATISTIC SECTION
 
 ExeFile:
 --------
-Number of blocks to be downloaded: 7
-Total size of all blocks to be downloaded: 1515
+Number of blocks to be downloaded: 8
+Total size of all blocks to be downloaded: 1622
 
