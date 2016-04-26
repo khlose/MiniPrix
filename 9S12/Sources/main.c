@@ -75,8 +75,11 @@ void IncrementTimer(void);
 void lcdwait(void);
 void putcspi(char);
 void putsspi(char[]);
-void ShiftOutTime(void);
+void ShiftOutMainTime(void);
 void ShiftOutTimeDummy(void);
+void ShiftOutFirstCar(void);
+void ShiftOutSecondCar(void);
+void dummy_led_driver(void);
 
 /******************************************************************************************/
 
@@ -257,13 +260,10 @@ void  initializations(void) {
     one_sec_record = (*(unsigned char*)0x4003);
   
   }
-  ShiftOutTimeDummy();
-
-
+  MODRR = 0;
+  PTT_PTT0 = 1;
+  PTT_PTT1 = 1;
   
-  
-
-
 }
 
 	 		  			 		  		
@@ -292,12 +292,16 @@ void main(void) {
 
   }
   
-  
+ 
+ 
+ dummy_led_driver(); 
  for(;;) {
   
   
+  //dummy_led_driver();
   if(player1_ready == 1 && player2_ready == 1 && start == 0){
     start = 1;
+    //clear all the display first
   }
    
   if(start == 1)
@@ -307,7 +311,7 @@ void main(void) {
       onesec = 0;
       
       //shift time out to main display (#0)
-      ShiftOutTime();
+      ShiftOutMainTime();
       
       IncrementTimer();
     }
@@ -328,6 +332,7 @@ void main(void) {
     one_sec_finish1 = one_sec;
     ten_min_finish1 = ten_min;
     one_min_finish1 = one_min;
+    ShiftOutFirstCar();
     is_time1_recorded = 1;
     //shift out time to display #1
         
@@ -537,47 +542,81 @@ void putsspi(char* ptr){
   }
 }
 
-void ShiftOutTime(void){
+void ShiftOutMainTime(void){
 
   char temp;
   PTM_PTM3 = 0;
+  PTM_PTM1 = 1;
+  PTM_PTM0 = 0;
   
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+one_sec;
   SPIDR = led_rep[one_sec];
   lcdwait();
   while(!SPISR_SPIF);
   temp = SPIDR;
   
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+ten_sec;
   SPIDR = led_rep[ten_sec];
   lcdwait();
   while(!SPISR_SPIF);
   temp = SPIDR;
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+one_min;
   SPIDR = led_rep[one_min];
   lcdwait();  
   while(!SPISR_SPIF);
   temp = SPIDR;
-  //SPIDR = 0x30+ten_min;
   SPIDR = led_rep[ten_min];
   lcdwait();
   while(!SPISR_SPIF);
   temp = SPIDR;
   
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+one_sec;
   SPIDR = '\n';
   lcdwait();
   while(!SPISR_SPIF);
   temp = SPIDR;
+  PTM_PTM3 = 1;  
+}
+
+void ShiftOutFirstCar(void){
+
+  char temp;
+  PTM_PTM3 = 0;
+  PTM_PTM1 = 0;
+  PTM_PTM0 = 1;
   
+  while(!SPISR_SPTEF);
+  SPIDR = led_rep[one_sec_finish1];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  while(!SPISR_SPTEF);
+  SPIDR = led_rep[ten_sec_finish1];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  while(!SPISR_SPTEF);
+  SPIDR = led_rep[one_min_finish1];
+  lcdwait();  
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  SPIDR = led_rep[ten_min_finish1];
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
+  
+  while(!SPISR_SPTEF);
+  SPIDR = '\n';
+  lcdwait();
+  while(!SPISR_SPIF);
+  temp = SPIDR;
   PTM_PTM3 = 1;  
 
-
 }
+
+
+
 
 
 void ShiftOutTimeDummy(void){
@@ -586,32 +625,31 @@ void ShiftOutTimeDummy(void){
   PTM_PTM3 = 0;
   
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+one_sec;
+  
   SPIDR = led_rep[one_sec_record];
   lcdwait();
   while(!SPISR_SPIF);
   temp = SPIDR;
   
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+ten_sec;
+  
   SPIDR = led_rep[ten_sec_record];
   lcdwait();
   while(!SPISR_SPIF);
   temp = SPIDR;
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+one_min;
+  
   SPIDR = led_rep[one_min_record];
   lcdwait();  
   while(!SPISR_SPIF);
   temp = SPIDR;
-  //SPIDR = 0x30+ten_min;
+  
   SPIDR = led_rep[ten_min_record];
   lcdwait();
   while(!SPISR_SPIF);
   temp = SPIDR;
   
   while(!SPISR_SPTEF);
-  //SPIDR = 0x30+one_sec;
   SPIDR = '\n';
   lcdwait();
   while(!SPISR_SPIF);
@@ -668,6 +706,54 @@ void IncrementTimer(void){
 }
 
 
+void dummy_led_driver(void){
+  int nDots = 50;
+  char mask;
+  int i;
+  int j;
+  PTT_PTT1 = 0; //SCK = 0
+  PTT_PTT0 = 0; //Sdata = 0;
+  for(i=0;i<32;i++){
+    PTT_PTT1 = 1;
+    PTT_PTT1 = 0;
+  }
+  for(i=0;i<nDots;i++){
+    PTT_PTT0 = 1;
+    PTT_PTT1 = 1; 
+    PTT_PTT1 = 0;
+    //shift red
+    for(j=0;j<5;j++){
+      PTT_PTT0 = 0;
+      PTT_PTT1 = 1;
+      PTT_PTT1 = 0;
+    }
+    //shift green
+    for(j=0;j<5;j++){
+      PTT_PTT0 = 0;
+      PTT_PTT1 = 1;
+      PTT_PTT1 = 0;
+    }
+    //shift blue
+    for(j=0;j<5;j++){
+      PTT_PTT0 = 0;
+      PTT_PTT1 = 1;
+      PTT_PTT1 = 0;
+    }
+    
+    
+  }
+  PTT_PTT0 = 0;
+  for(i=0;i<nDots;i++){
+    PTT_PTT1 = 1;
+    PTT_PTT1 = 0;
+  }
+  lcdwait();
+  lcdwait();
+  lcdwait();
+  lcdwait();
+  
+
+}
 /*********************************************************************************************************
                                                                                                        
 Stor the best record in 2 words(16-bit data) min,sec

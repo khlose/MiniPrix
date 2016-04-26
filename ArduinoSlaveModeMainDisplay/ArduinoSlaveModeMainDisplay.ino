@@ -16,7 +16,8 @@ const int Dig1 = A2;
 const int Dig2 = A3;
 const int Dig3 = A4;
 const int Dig4 = A5;
-
+const int SS2 = A0;
+const int SS3 = A1;
 
 
 void setup(void)
@@ -46,15 +47,17 @@ ISR(SPI_STC_vect)
   byte c = SPDR;  // grab byte from SPI Data Register
 
           // add to buffer if room
-  if (pos < sizeof buf)
-  {
-    buf[pos++] = c;
-
-    // example: newline means time to process buffer
-    if (c == '\n')
-      process_it = true;
-
-  }  // end of room available
+  if(digitalRead(SS2) == LOW && digitalRead(SS3) == HIGH){
+    if (pos < sizeof buf)
+    {
+      buf[pos++] = c;
+  
+      // example: newline means time to process buffer
+      if (c == '\n')
+        process_it = true;
+  
+    }  // end of room available
+  }
 }  // end of interrupt routine SPI_STC_vect
 
    // main loop - wait for flag set in interrupt routine
@@ -218,6 +221,8 @@ void LedInit() {
   pinMode(Dig3, OUTPUT);
   pinMode(Dig4, OUTPUT);
   pinMode(9, OUTPUT);
+  pinMode(SS2, INPUT);
+  pinMode(SS3, INPUT);
   digitalWrite(Dig1, LOW);
   digitalWrite(Dig2, LOW);
   digitalWrite(Dig3, LOW);
