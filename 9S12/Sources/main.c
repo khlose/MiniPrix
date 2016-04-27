@@ -316,6 +316,8 @@ void main(void) {
   
   if(player1_ready == 1 && player2_ready == 1 && start == 0){
     start = 1;
+    led_strip(5,5,5,50);
+    populate_record();
     //clear all the display first
   }
    
@@ -332,7 +334,7 @@ void main(void) {
       IncrementTimer();
       if(is_there_record == 1){
         
-        led_strip(5,0,0,total_sec_current*dot_per_sec);
+        led_strip(5,0,0,(int)(total_sec_current*dot_per_sec));
       }
     }
     if(cars_released == 0){
@@ -367,12 +369,12 @@ void main(void) {
         
   }
   
-  if(player1_finish == 1 && player2_finish == 1){
+  if(player1_finish == 1 && player2_finish == 1 & is_time1_recorded == 1 & is_time2_recorded == 1){
     /*race ended, reset everything*/
     start = 0;
     race_winner = compare_highscore();
     store_highscore(race_winner);
-    
+    //populate_record();
     player1_ready = 0;
     player2_ready = 0;
     player1_finish = 0;
@@ -386,9 +388,10 @@ void main(void) {
     one_sec = 0;
     one_min = 0;
     total_sec_current = 0;
-    //populate_record();
+    //
   }
   if(reset == 1){
+    //populate_record();
     reset = 0;
     ten_min = 0;
     one_min = 0;
@@ -411,23 +414,11 @@ void main(void) {
     ShiftOutMainTime();
     ShiftOutFirstCar();
     ShiftOutSecondCar();
-    //populate_record();
+    led_strip(5,5,5,50);
+    //
   }
   
-  //using left push button to increment one digit of stored second
-  /*
-  if(debug_store == 1){
-    debug_store = 0;
-    om++;
-    rval = Flash_Erase_Sector((unsigned int *)0x4000);
-  
-    m = (int)tm << 8 | om;
-    s = (int)ts << 8 | os;
-    rval = Flash_Write_Word((unsigned int *)0x4000,m);
-    rval = Flash_Write_Word((unsigned int *)0x4002,s);
-    
-  }
-  */
+
   
   
  }/* loop forever */
