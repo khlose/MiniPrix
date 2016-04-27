@@ -1,0 +1,2 @@
+Data:1 < ADDXPR ONLY_ADD_IF_NEW "dot_per_sec"
+Data:1 < ADDXPR ONLY_ADD_IF_NEW "total_sec_record"
