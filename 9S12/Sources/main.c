@@ -83,7 +83,8 @@ void clock_delay(void);
 int compare_highscore(void);
 void store_highscore(int);
 void populate_record(void);
-
+void pulse_solenoid(void);
+void clear_ready_go_light(void);
 
 /******************************************************************************************/
 
@@ -121,7 +122,8 @@ int is_time1_recorded = 0;
 int is_time2_recorded = 0;
 int reset = 0;
 int race_winner = 0; //0 = record, 1 = player1, 2 = player2
-
+int ready = 0;
+int ready_cnt= 0;
 
 /* Timer variables */
 char ten_sec = 0; // MM:"S"S
@@ -282,6 +284,9 @@ void  initializations(void) {
   /*Record Init*/
   total_sec_record = ten_min_record*600 + one_min_record*60 + ten_sec_record*10 + one_sec_record;
   dot_per_sec = 50/total_sec_record;
+  if(dot_per_sec == 0){
+    dot_per_sec = 1;
+  }
   total_sec_current = 0;
   
   /*LED STRIP INIT*/
@@ -290,6 +295,12 @@ void  initializations(void) {
   PTT_PTT5 = 0;
   led_strip(5,5,5,50);
   
+  
+  
+  /*Solenoid PTT PTT3*/
+  PTT_PTT3 = 0;
+  PTT_PTT1 = 0;
+  PTT_PTT0 = 0;
 }
 
 	 		  			 		  		
@@ -313,17 +324,31 @@ void main(void) {
  
  
  for(;;) {
-  
   if(player1_ready == 1 && player2_ready == 1 && start == 0){
-    start = 1;
     led_strip(5,5,5,50);
     populate_record();
     //clear all the display first
+    if(onesec == 1){
+      onesec = 0;
+      PTT_PTT1 = 1;
+      PTT_PTT2 = 1;
+      PTT_PTT2 = 0;
+      PTT_PTT2 = 1;
+      PTT_PTT2 = 0;
+      ready_cnt ++;
+      if(ready_cnt >= 4){
+        start = 1;
+        ready_cnt = 0;
+        ready = 0;
+      }
+    }
+    
+    
   }
    
   if(start == 1)
   {  
-    if(onesec == 1)
+    if(onesec == 1 && cars_released == 1)
     {
       onesec = 0;
       
@@ -334,7 +359,7 @@ void main(void) {
       IncrementTimer();
       if(is_there_record == 1){
         
-        led_strip(5,0,0,(int)(total_sec_current*dot_per_sec));
+        led_strip(0,5,0,(int)(total_sec_current*dot_per_sec));
       }
     }
     if(cars_released == 0){
@@ -342,7 +367,7 @@ void main(void) {
       
       //wait 5 secs
       //set the pin low
-      
+      pulse_solenoid();
       //make sure solenoid won't be activated again
       cars_released = 1;
       
@@ -374,6 +399,13 @@ void main(void) {
     start = 0;
     race_winner = compare_highscore();
     store_highscore(race_winner);
+    if(race_winner == 0){
+      led_strip(0,5,0,50);
+    } else if(race_winner == 1){
+      led_strip(5,0,0,50);
+    }else{
+      led_strip(0,0,5,50);
+    }
     //populate_record();
     player1_ready = 0;
     player2_ready = 0;
@@ -388,6 +420,8 @@ void main(void) {
     one_sec = 0;
     one_min = 0;
     total_sec_current = 0;
+    ready_cnt = 0;
+    ready = 0;
     //
   }
   if(reset == 1){
@@ -415,6 +449,9 @@ void main(void) {
     ShiftOutFirstCar();
     ShiftOutSecondCar();
     led_strip(5,5,5,50);
+    ready_cnt = 0;
+    ready = 0;
+    clear_ready_go_light();
     //
   }
   
@@ -1175,6 +1212,34 @@ void populate_record(void){
   /*Record Init*/
   total_sec_record = ten_min_record*600 + one_min_record*60 + ten_sec_record*10 + one_sec_record;
   dot_per_sec = 50/total_sec_record;
+  if(dot_per_sec == 0){
+    dot_per_sec = 1;
+  }
   total_sec_current = 0;
 
+}
+
+
+void pulse_solenoid(void) {
+  int cnt = 0;
+  PTT_PTT3 = 1;
+  for(cnt = 0; cnt <500;cnt++){
+    clock_delay();
+  }
+ 
+  PTT_PTT3 = 0;
+  
+}
+
+
+
+
+void clear_ready_go_light(void){
+  int cnt=0;
+  for(cnt= 0;cnt < 10;cnt++){
+    
+    PTT_PTT1 = 0;
+    PTT_PTT2 = 1;
+    PTT_PTT2 = 0;
+  }
 }
